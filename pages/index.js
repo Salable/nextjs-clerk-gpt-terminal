@@ -7,7 +7,7 @@ import Terminal, { ColorMode, TerminalOutput, TerminalInput } from 'react-termin
 async function getData(prompt) {
 
   try {
-    const res = await fetch("/api/getAuthenticatedUserId?prompt="+prompt);
+    const res = await fetch("/api/queryGPT?prompt="+prompt);
     const body = await res.json();
     console.log(JSON.stringify(body, null, "  "));
     return body["output"]
@@ -27,10 +27,8 @@ const TerminalController = (props = {}) => {
 
   const onInput = async function(input) {
     let ld = [...terminalLineData];
-    ld.push(<TerminalInput>{input}</TerminalInput>);
-    setTerminalLineData(ld)
     const resp = await getData(input)
-    console.dir(resp)
+    ld.push(<TerminalInput>{input}</TerminalInput>);
     ld.push(<TerminalOutput>{resp}</TerminalOutput>);
     setTerminalLineData(ld);
   }

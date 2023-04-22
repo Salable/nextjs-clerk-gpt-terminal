@@ -15,7 +15,7 @@ const Header = () => (
       <Link href="/">
         <a className={styles.logo}>
           <Image src="/logo.svg" width="32" height="32" alt="Logo" />
-          <span className={styles.appName}>Newspaper-er</span>
+          <span className={styles.appName}>AdaGPT</span>
         </a>
       </Link>
     </div>
