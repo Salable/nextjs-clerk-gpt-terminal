@@ -183,6 +183,11 @@
   resolved "https://registry.yarnpkg.com/@salable/node-sdk/-/node-sdk-1.6.2.tgz#a48687a3414215bf1af30d4c58f127c827246796"
   integrity sha512-tAWL6doDc81OODCJeVie98Xa8PERguBgH+a98QFmcR9w71YoI6P6wvkz2cyFhKlslU7FWDEpQEoev/nK0tiWwQ==
 
+"@salable/react-sdk@1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@salable/react-sdk/-/react-sdk-1.8.0.tgz#79d05b59e8973751f95642953b8b5d8311f1e6b3"
+  integrity sha512-zKXK+x8zb/oZmdW+86C1ROdKDn4FK932ZjvN8Z5jQWVLQ84/zNLaF4eomx5nFb2x1+PckVYB2sgtHYNjIDcWwg==
+
 "@swc/helpers@0.4.11":
   version "0.4.11"
   resolved "https://registry.yarnpkg.com/@swc/helpers/-/helpers-0.4.11.tgz#db23a376761b3d31c26502122f349a21b592c8de"

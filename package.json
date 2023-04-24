@@ -16,6 +16,7 @@
   "dependencies": {
     "@clerk/nextjs": "^4.7.0",
     "@salable/node-sdk": "^1.6.2",
+    "@salable/react-sdk": "1.8.0",
     "langchain": "^0.0.61",
     "next": "^12.3.3",
     "react": "18.2.0",
