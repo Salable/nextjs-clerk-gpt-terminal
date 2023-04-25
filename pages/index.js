@@ -8,12 +8,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 // Create UserContext with a default value
 const SalableContext = createContext(null);
 
-// Create a UserProvider component
 const SalableProvider = ({ children }) => {
   const [capabilities, setCapabilities] = useState([]);
   const [licensed, setLicensed] = useState(null);
-  
-  // Function to change the user's role
   const updateCapabilities = (capbitliesArray) => {
     setCapabilities(capbitliesArray);
   };
@@ -76,35 +73,29 @@ const SignupLink = () => (
   </Link>
 );
 
-
 const Main = () => {
-  const { capabilities, licensed } = useSalable();
-  console.log(capabilities)
-  console.log(licensed)
   return (
     <main className={styles.main}>
-    <SignedOut>
-      <p className={styles.description}>Sign in to get started</p>
-    </SignedOut>
-    <SignedOut>
+      <SignedOut> 
+        <p className={styles.description}>Sign in to get started</p>
+      </SignedOut>
+      <SignedOut>
         <div className={styles.card}>
           <SignupLink />
         </div>
       </SignedOut>            
-        <IsNotLicensed>
+      <IsNotLicensed>
         <h1>Please purchase AdaGPT</h1>
         <p>AdaGPT is a GPT-3 powered chatbot that can be used to generate text, images, and audio. AdaGPT is a great way to explore the capabilities of GPT-3 and to get started with Salable.</p>
         <Link href="/purchase">Purchase AdaGPT</Link>
-        </IsNotLicensed>
-        <IsLicensed>
-          <h1>Thank you for purchasing AdaGPT</h1>
-          <Link href="/chat">Launch Terminal</Link>
-        </IsLicensed>      
+      </IsNotLicensed>
+      <IsLicensed>
+        <h1>Thank you for purchasing AdaGPT</h1>
+        <Link href="/chat">Launch Terminal</Link>
+      </IsLicensed>      
     </main>
   );
 } 
-
-
 
 // Footer component
 const Footer = () => (
@@ -112,6 +103,8 @@ const Footer = () => (
   </footer>
 );
 
+// Home component
+// Render with the SalableProvider to make the SalableContext available
 const Home = () => (
   <SalableProvider>
     <Main />

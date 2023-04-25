@@ -2,8 +2,6 @@ import styles from "/styles/Shared.module.css";
 import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import {TerminalController} from "/components/TerminalUI"
-
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Create UserContext with a default value
@@ -13,8 +11,6 @@ const SalableContext = createContext(null);
 const SalableProvider = ({ children }) => {
   const [capabilities, setCapabilities] = useState([]);
   const [licensed, setLicensed] = useState(null);
-  
-  // Function to change the user's role
   const updateCapabilities = (capbitliesArray) => {
     setCapabilities(capbitliesArray);
   };
@@ -38,7 +34,6 @@ const SalableProvider = ({ children }) => {
     }
     makeQuery()   
   }, [])
-
 
   return (
     <SalableContext.Provider value={{ capabilities, licensed, setCapabilities }}>
@@ -102,7 +97,6 @@ const Main = () => {
     </main>
   )
 }
-  
 
 // Footer component
 const Footer = () => (
@@ -110,6 +104,8 @@ const Footer = () => (
   </footer>
 );
 
+// Home component
+// Render with the SalableProvider to make the SalableContext available
 const Home = () => (
   <SalableProvider>
     <Main />
