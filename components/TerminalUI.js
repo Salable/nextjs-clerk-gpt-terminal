@@ -34,8 +34,8 @@ async function getData(prompt) {
     // Terminal has 100% width by default so it should usually be wrapped in a container div
     return (
       <div className="container">
-        <Terminal name='AdaGPT' colorMode={ ColorMode.Dark }  prompt="$" onInput={onInput} key="terminal">
-          { terminalLineData }
+        <Terminal name='AdaGPT' colorMode={ ColorMode.Dark }  prompt="$" onInput={onInput} >
+          {terminalLineData }
         </Terminal>
       </div>          
     )
