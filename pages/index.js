@@ -1,33 +1,65 @@
 import styles from "/styles/Shared.module.css";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
-import React from "react";
+import { SignedOut } from "@clerk/nextjs";
 import Link from "next/link";
-import { clerkClient, getAuth } from "@clerk/nextjs/server";
-const { SalableApi } = require("@salable/node-sdk");
-import {SalablePricingTableReact} from "@salable/react-sdk"; 
 
-export const getServerSideProps = async ({ req, query }) => {
-  const { userId } = getAuth(req);
-  const user = userId ? await clerkClient.users.getUser(userId) : null;
-  const api = new SalableApi(process.env["SALABLE_API_KEY"]);
-  try {
-    const capabilitiesCheck = await api.licenses.checkLicenses(
-      process.env["SALABLE_PRODUCT_ID"],
-      [user.id]
-    );
-    console.dir(capabilitiesCheck.capabilities)
-    if (capabilitiesCheck.capabilities.includes("usage")) {
-      console.log(`${user.id} is licensed`)
-      return { props: {  user: user.id, licensed: true, capabilities: capabilitiesCheck.capabilities} };
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+// Create UserContext with a default value
+const SalableContext = createContext(null);
+
+// Create a UserProvider component
+const SalableProvider = ({ children }) => {
+  const [capabilities, setCapabilities] = useState([]);
+  const [licensed, setLicensed] = useState(null);
+  
+  // Function to change the user's role
+  const updateCapabilities = (capbitliesArray) => {
+    setCapabilities(capbitliesArray);
+  };
+
+  // Query salable api to return capabilities in useEffect
+  useEffect( () => {
+    const makeQuery = async () => {
+      try {
+        const res = await fetch("/api/salable");
+        const body = await res.json();
+        setCapabilities(body["capabilities"])
+        if (body.capabilities.includes("usage")) {
+          setLicensed(true)
+        } else {
+          setLicensed(false)
+        }
+      } catch (e) {
+        console.log("// There was an error with the request");    
+        console.dir(e)
+      }
     }
-    return { props: {  user: user.id, licensed: false, capabilities: capabilitiesCheck.capabilities} };
-  } catch (err) {
-    console.log("Found an error!")
-    console.error(err);
-    return { props: {  user: userId, licensed: false} };
-  }  
+    makeQuery()   
+  }, [])
+
+
+  return (
+    <SalableContext.Provider value={{ capabilities, licensed, setCapabilities }}>
+      {children}
+    </SalableContext.Provider>
+  );
 };
 
+// Create a custom hook to use the UserContext
+const useSalable = () => {
+  return useContext(SalableContext);
+};
+
+const IsLicensed = ({children}) => {
+  const { licensed } = useSalable();
+  return licensed !== null && licensed === true ? children : null;
+}
+
+const IsNotLicensed = ({children}) => {
+  const { licensed } = useSalable();
+  return licensed !== null && licensed === false ? children : null;
+}
 
 const SignupLink = () => (
   <Link href="/sign-up">
@@ -45,48 +77,34 @@ const SignupLink = () => (
 );
 
 
-const Main = ({licensed, user, capabilities}) => (
-  <main className={styles.main}>
-  <SignedOut>
-    <p className={styles.description}>Sign in to get started</p>
-  </SignedOut>
-  <SignedOut>
-      <div className={styles.card}>
-        <SignupLink />
-      </div>
+const Main = () => {
+  const { capabilities, licensed } = useSalable();
+  console.log(capabilities)
+  console.log(licensed)
+  return (
+    <main className={styles.main}>
+    <SignedOut>
+      <p className={styles.description}>Sign in to get started</p>
     </SignedOut>
-    <SignedIn>        
-        {licensed ? <h1>Thank you for purchasing AdaGPT</h1> : <h1>Please purchase AdaGPT</h1> }        
-        {licensed ? <Link href="/chat">Launch Terminal</Link> : 
-          <div>
-            <p>AdaGPT is a GPT-3 powered chatbot that can be used to generate text, images, and audio. AdaGPT is a great way to explore the capabilities of GPT-3 and to get started with Salable.</p>  
-          <SalablePricingTableReact 
-          envConfig={{
-            pricingTableUuid: '99d9fff3-83d4-4e95-94bf-18e8d5ea4845',
-            apiKey: '85selEfohS2yQcF4ukLjo8UVVOtn8NZi56zeNxSR',
-            globalPlanOptions: {
-              granteeId: user,
-              cancelUrl: 'https://example.com/cancel'
-            },
-            theme: "light"
-          }}
-          checkoutConfig={{
-            member: 'example-member-123',
-            customer: {
-              email: "customer@company.com"
-            }
-          }}  
-        />
+    <SignedOut>
+        <div className={styles.card}>
+          <SignupLink />
+        </div>
+      </SignedOut>            
+        <IsNotLicensed>
+        <h1>Please purchase AdaGPT</h1>
+        <p>AdaGPT is a GPT-3 powered chatbot that can be used to generate text, images, and audio. AdaGPT is a great way to explore the capabilities of GPT-3 and to get started with Salable.</p>
+        <Link href="/purchase">Purchase AdaGPT</Link>
+        </IsNotLicensed>
+        <IsLicensed>
+          <h1>Thank you for purchasing AdaGPT</h1>
+          <Link href="/chat">Launch Terminal</Link>
+        </IsLicensed>      
+    </main>
+  );
+} 
 
 
-
-          </div>}
-    </SignedIn>
-    <p>
-      {licensed ? "You are licensed" : "You are not licensed"}
-    </p>
-  </main>
-);
 
 // Footer component
 const Footer = () => (
@@ -94,8 +112,11 @@ const Footer = () => (
   </footer>
 );
 
-const Home = ({licensed, user, capabilities}) => (
-  <Main licensed={licensed} user={user} capabilities={capabilities}/>
+const Home = () => (
+  <SalableProvider>
+    <Main />
+  </SalableProvider>
+  
 );
 
 export default Home;

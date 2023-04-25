@@ -1,9 +1,66 @@
 import styles from "/styles/Shared.module.css";
 import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
-import React from "react";
 import Link from "next/link";
 import {TerminalController} from "/components/TerminalUI"
 
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+// Create UserContext with a default value
+const SalableContext = createContext(null);
+
+// Create a UserProvider component
+const SalableProvider = ({ children }) => {
+  const [capabilities, setCapabilities] = useState([]);
+  const [licensed, setLicensed] = useState(null);
+  
+  // Function to change the user's role
+  const updateCapabilities = (capbitliesArray) => {
+    setCapabilities(capbitliesArray);
+  };
+
+  // Query salable api to return capabilities in useEffect
+  useEffect( () => {
+    const makeQuery = async () => {
+      try {
+        const res = await fetch("/api/salable");
+        const body = await res.json();
+        setCapabilities(body["capabilities"])
+        if (body.capabilities.includes("usage")) {
+          setLicensed(true)
+        } else {
+          setLicensed(false)
+        }
+      } catch (e) {
+        console.log("// There was an error with the request");    
+        console.dir(e)
+      }
+    }
+    makeQuery()   
+  }, [])
+
+
+  return (
+    <SalableContext.Provider value={{ capabilities, licensed, setCapabilities }}>
+      {children}
+    </SalableContext.Provider>
+  );
+};
+
+// Create a custom hook to use the UserContext
+const useSalable = () => {
+  return useContext(SalableContext);
+};
+
+const IsLicensed = ({children}) => {
+  const { licensed } = useSalable();
+  return licensed !== null && licensed === true ? children : null;
+}
+
+const IsNotLicensed = ({children}) => {
+  const { licensed } = useSalable();
+  return licensed !== null && licensed === false ? children : null;
+}
 
 const SignupLink = () => (
   <Link href="/sign-up">
@@ -21,21 +78,31 @@ const SignupLink = () => (
 );
 
 
-const Main = () => (
-  <main className={styles.main}>
-  <SignedOut>
-    <p className={styles.description}>Sign in to get started</p>
-  </SignedOut>
-  <SignedOut>
+const Main = () => {
+  const { capabilities, licensed } = useSalable();
+  console.log(capabilities)
+  console.log(licensed)
+  return (
+    <main className={styles.main}>
+    <SignedOut>
+      <p className={styles.description}>Sign in to get started</p>
       <div className={styles.card}>
-        <SignupLink />
-      </div>
+          <SignupLink />
+      </div>      
     </SignedOut>
-    <SignedIn>        
-        <TerminalController id="terminal"/>
+    <SignedIn> 
+      <IsLicensed>
+        <TerminalController key="terminal"/>
+      </IsLicensed>               
+      <IsNotLicensed>
+        <h3>Purchase AdaGPT today</h3>
+        <Link href="/purchase">Purchase AdaGPT</Link>
+      </IsNotLicensed>
     </SignedIn>
-  </main>
-);
+    </main>
+  )
+}
+  
 
 // Footer component
 const Footer = () => (
@@ -44,7 +111,9 @@ const Footer = () => (
 );
 
 const Home = () => (
-  <Main />
+  <SalableProvider>
+    <Main />
+  </SalableProvider>
 );
 
 export default Home;
