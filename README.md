@@ -16,3 +16,10 @@ yarn install && yarn run dev
 
 #### Docker
 docker build -t adagpt-fe . && docker run -it -p 3000:3000 adagpt-fe
+
+#### Fly.io
+  curl -L https://fly.io/install.sh | sh
+  export FLYCTL_INSTALL="/home/node/.fly"
+  export PATH="$FLYCTL_INSTALL/bin:$PATH"
+  flyctl auth login
+  flytctl launch || flyctl deploy
