@@ -6,6 +6,8 @@ const { SalableApi } = require("@salable/node-sdk");
 // The handler checks for a valid session, whether the user is licensed with Salable, and then calls callGPT
 export default async function handler(req, res) {
   const { sessionId, userId } = getAuth(req);
+  let licenses = []
+  let capabilities = []
   if (!sessionId) {
     return res.status(401).json({ id: null });
   } else {
@@ -16,12 +18,25 @@ export default async function handler(req, res) {
         process.env["SALABLE_PRODUCT_ID"],
         [userId]
       );
-      return res.status(200).json({ id: userId, capabilities: capabilitiesCheck.capabilities });
+      capabilities=capabilitiesCheck.capabilities      
     } catch (err) {
       console.log("Found an error!")
       console.log(err.status)
-      console.error(err);
-      return res.status(200).json({ id: userId, output: "Error, try again..." , capabilities: []});
+      console.error(err);      
     }
+    try {
+      // const returnedLicenses = await api.licenses.getLicenses(userId);
+      const res = await fetch("https://api.salable.app/licenses/granteeId/"+userId+"?expand=[product,plan,subscription]", {
+        method: "GET", 
+        headers: {
+          "x-api-key" : process.env["SALABLE_API_KEY"]
+        }
+      });
+      const body = await res.json();
+      licenses=body
+    } catch (err) {
+      console.error(err);
+    }
+    return res.status(200).json({ id: userId, licenses: licenses, capabilities: capabilities});
   }  
 }

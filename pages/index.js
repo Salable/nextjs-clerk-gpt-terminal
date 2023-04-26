@@ -22,7 +22,7 @@ const SalableProvider = ({ children }) => {
         const res = await fetch("/api/salable");
         const body = await res.json();
         setCapabilities(body["capabilities"])
-        if (body.capabilities.includes("usage")) {
+        if (body.capabilities.includes("free")) {
           setLicensed(true)
         } else {
           setLicensed(false)
