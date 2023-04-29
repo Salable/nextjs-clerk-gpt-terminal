@@ -2,7 +2,8 @@ import styles from "/styles/Shared.module.css";
 import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SignupLink } from "/components/SignUp";
-import { PurchaseLink } from "/components/Salable/Purchase";
+import { useRouter } from 'next/router';
+
 // 
 // TODO: Move to Salable React provider
 //
@@ -74,6 +75,8 @@ const IsNotLicensed = ({children, capabilitiesCheckValue}) => {
 // This renders components based on the user's sign in status and licensed status
 const Main = () => {
   const { isLoaded, user } = useUser()
+  const router = useRouter();
+  const {entitlement} = router.query
   return (
     isLoaded ?
     <main className={styles.main}>
@@ -86,14 +89,7 @@ const Main = () => {
         </IsNotLicensed>
       </SignedOut>     
       <SignedIn>
-        <IsNotLicensed capabilitiesCheckValue="free">
-          <h1>This app is not licensed for use</h1>
-          <p>Here you can provide the user with an opportunity to purchase one or more subscriptions for your product.</p>
-          <PurchaseLink />
-        </IsNotLicensed>
-        <IsLicensed capabilitiesCheckValue="free">
-          <h1>This app is licensed.</h1>
-        </IsLicensed>
+        {entitlement}
       </SignedIn>     
     </main>
     : <></>
@@ -106,7 +102,6 @@ const Home = () => (
   <SalableProvider>
     <Main />
   </SalableProvider>
-  
 );
 
 export default Home;
