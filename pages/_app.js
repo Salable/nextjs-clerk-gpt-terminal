@@ -8,7 +8,7 @@ const NextApp = ({ Component, pageProps }) => {
   return (
     <ClerkProvider {...pageProps}>
       <Head>
-        <title>AdaGPT</title>
+        <title>{process.env["NEXT_PUBLIC_PRODUCT_TITLE"]}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>

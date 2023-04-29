@@ -9,13 +9,13 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 // on whether or not a visitor is signed in.
 //
 // https://docs.clerk.dev/frontend/react/signedin-and-signedout
-const Header = () => (
+const Header = ({productTitle}) => (
   <header className={styles.header}>
     <div className={styles.left}>
       <Link href="/">
         <a className={styles.logo}>
           <Image src="/logo.svg" width="32" height="32" alt="Logo" />
-          <span className={styles.appName}>AdaGPT</span>
+          <span className={styles.appName}>{productTitle}</span>
         </a>
       </Link>
     </div>
