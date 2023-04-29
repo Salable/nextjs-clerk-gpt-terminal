@@ -1,29 +1,31 @@
 import styles from "/styles/Shared.module.css";
-import { SignedOut } from "@clerk/nextjs";
-import Link from "next/link";
-
-
+import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-// Create UserContext with a default value
+import { SignupLink } from "/components/SignUp";
+import { PurchaseLink } from "../components/Salable/Purchase";
+// 
+// TODO: Move to Salable React provider
+//
 const SalableContext = createContext(null);
 
 const SalableProvider = ({ children }) => {
   const [capabilities, setCapabilities] = useState([]);
   const [licensed, setLicensed] = useState(null);
-  const updateCapabilities = (capbitliesArray) => {
-    setCapabilities(capbitliesArray);
-  };
-
+  const [userId, setUserId] = useState(null);
+  const [licenses, setLicenses] = useState([])
+  
   // Query salable api to return capabilities in useEffect
   useEffect( () => {
     const makeQuery = async () => {
       try {
         const res = await fetch("/api/salable");
         const body = await res.json();
+        console.dir(body)
         setCapabilities(body["capabilities"])
+        setUserId(body["id"])
+        setLicenses(body["licenses"])
         if (body.capabilities.includes("free")) {
-          setLicensed(true)
+          setLicensed(true)          
         } else {
           setLicensed(false)
         }
@@ -36,11 +38,11 @@ const SalableProvider = ({ children }) => {
   }, [])
 
 
-  return (
-    <SalableContext.Provider value={{ capabilities, licensed, setCapabilities }}>
-      {children}
-    </SalableContext.Provider>
-  );
+    return (
+      <SalableContext.Provider value={{ capabilities, licensed, setCapabilities, userId, licenses}}>
+        {children}
+      </SalableContext.Provider>
+    );
 };
 
 // Create a custom hook to use the UserContext
@@ -48,60 +50,56 @@ const useSalable = () => {
   return useContext(SalableContext);
 };
 
-const IsLicensed = ({children}) => {
-  const { licensed } = useSalable();
-  return licensed !== null && licensed === true ? children : null;
+const IsLicensed = ({children, capabilitiesCheckValue}) => {
+  const { licensed, capabilities } = useSalable();
+  if (capabilities.includes(capabilitiesCheckValue)) {
+    return children
+  } 
+  return null;
 }
 
-const IsNotLicensed = ({children}) => {
-  const { licensed } = useSalable();
-  return licensed !== null && licensed === false ? children : null;
+const IsNotLicensed = ({children, capabilitiesCheckValue}) => {
+  const { licensed, capabilities } = useSalable();
+  if (capabilities.includes(capabilitiesCheckValue)) {
+    return null
+  } 
+  return children;
 }
 
-const SignupLink = () => (
-  <Link href="/sign-up">
-    <a className={styles.cardContent}>
-      <img alt="Sign up" src="/icons/user-plus.svg" />
-      <div>
-        <h3>Sign in to get started</h3>
-        <p>Sign up and sign in to explore all the wonder of GPT with Salable</p>
-      </div>
-      <div className={styles.arrow}>
-        <img src="/icons/arrow-right.svg" />
-      </div>
-    </a>
-  </Link>
-);
+//
+// End Salable React Provider
+//
 
+
+// Main component
+// This renders components based on the user's sign in status and licensed status
 const Main = () => {
+  const { isLoaded, user } = useUser()
   return (
+    isLoaded ?
     <main className={styles.main}>
       <SignedOut> 
-        <p className={styles.description}>Sign in to get started</p>
-      </SignedOut>
-      <SignedOut>
-        <div className={styles.card}>
-          <SignupLink />
-        </div>
-      </SignedOut>            
-      <IsNotLicensed>
-        <h1>Please purchase AdaGPT</h1>
-        <p>AdaGPT is a GPT-3 powered chatbot that can be used to generate text, images, and audio. AdaGPT is a great way to explore the capabilities of GPT-3 and to get started with Salable.</p>
-        <Link href="/purchase">Purchase AdaGPT</Link>
-      </IsNotLicensed>
-      <IsLicensed>
-        <h1>Thank you for purchasing AdaGPT</h1>
-        <Link href="/chat">Launch Terminal</Link>
-      </IsLicensed>      
+        <IsNotLicensed capabilitiesCheckValue="free">
+          <p className={styles.description}>Sign in to get started</p>
+          <div className={styles.card}>
+            <SignupLink />
+          </div>
+        </IsNotLicensed>
+      </SignedOut>     
+      <SignedIn>
+        <IsNotLicensed capabilitiesCheckValue="free">
+          <h1>This app is not licensed for use</h1>
+          <p>Here you can provide the user with an opportunity to purchase one or more subscriptions for your product.</p>
+          <PurchaseLink />
+        </IsNotLicensed>
+        <IsLicensed capabilitiesCheckValue="free">
+          <h1>Thank you for purchasing AdaGPT</h1>
+        </IsLicensed>
+      </SignedIn>     
     </main>
+    : <></>
   );
 } 
-
-// Footer component
-const Footer = () => (
-  <footer className={styles.footer}>
-  </footer>
-);
 
 // Home component
 // Render with the SalableProvider to make the SalableContext available

@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       console.log("Found capabilities: " , capabilitiesCheck)
       console.log(`${userId} has the capabilities:`)
       console.dir(capabilitiesCheck)
-      if ("usage" in capabilitiesCheck.capabilities) {
+      if ("free" in capabilitiesCheck.capabilities) {
         const {prompt} = req.query
         const result = await callGPT(prompt)
 

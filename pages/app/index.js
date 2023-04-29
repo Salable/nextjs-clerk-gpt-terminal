@@ -1,9 +1,8 @@
 import styles from "/styles/Shared.module.css";
 import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {SalablePricingTableReact} from "@salable/react-sdk";
-import {SignupLink} from "/components/SignUp";
-import { LicenseBlock } from "../../components/Salable/LicenseStatus";
+import { SignupLink } from "/components/SignUp";
+import { PurchaseLink } from "/components/Salable/Purchase";
 // 
 // TODO: Move to Salable React provider
 //
@@ -66,64 +65,39 @@ const IsNotLicensed = ({children, capabilitiesCheckValue}) => {
   } 
   return children;
 }
-
 //
 // End Salable React Provider
 //
 
+
+// Main component
+// This renders components based on the user's sign in status and licensed status
 const Main = () => {
-  const {userId, licenses} = useSalable()
-  const { isLoaded, isSignedIn, user } = useUser()
-  console.dir(userId)
-  console.dir(licenses)
-  if (!isLoaded || !isSignedIn) {
-    return null
-  } else {
-    return (
-      <main className={styles.main}>
-        <SignedOut> 
+  const { isLoaded, user } = useUser()
+  return (
+    isLoaded ?
+    <main className={styles.main}>
+      <SignedOut> 
+        <IsNotLicensed capabilitiesCheckValue="free">
           <p className={styles.description}>Sign in to get started</p>
           <div className={styles.card}>
             <SignupLink />
           </div>
-        </SignedOut>
-        <SignedIn>
-          <IsNotLicensed capabilitiesCheckValue={"free"}>
-            <h1>Buy now!</h1>
-            <SalablePricingTableReact 
-            envConfig={{
-                productUuid: 'fdcc8ebe-686a-40cc-90fb-82fd6b2983e3',
-                apiKey: 'KdnPPzYaZqiHE0l7VUrT1k2gmURTgLd3EjXbxGT1',
-                globalPlanOptions: {
-                granteeId: userId,
-                cancelUrl: '/purchase'
-                },
-                theme: "light"
-            }}
-            checkoutConfig={{
-                member: user.emailAddresses[0].emailAddress,
-                customer: {
-                email: user.emailAddresses[0].emailAddress
-                }
-            }}  
-            />
-          </IsNotLicensed>
-          <IsLicensed capabilitiesCheckValue={"free"}>
-            <h1>Thank you for purchasing AdaGPT</h1>
-            <div>
-            {licenses.map((license, i) => {
-              return license.status === "ACTIVE" ?  
-              <div key={i}>
-                <LicenseBlock id={license.uuid} plan={license.plan.displayName} status= {license.status} />
-              </div> : <></>
-            })}
-            </div>
-          </IsLicensed>   
-        </SignedIn>              
-      </main>
-    );
-  }
-  
+        </IsNotLicensed>
+      </SignedOut>     
+      <SignedIn>
+        <IsNotLicensed capabilitiesCheckValue="free">
+          <h1>This app is not licensed for use</h1>
+          <p>Here you can provide the user with an opportunity to purchase one or more subscriptions for your product.</p>
+          <PurchaseLink />
+        </IsNotLicensed>
+        <IsLicensed capabilitiesCheckValue="free">
+          <h1>This app is licensed.</h1>
+        </IsLicensed>
+      </SignedIn>     
+    </main>
+    : <></>
+  );
 } 
 
 // Home component
