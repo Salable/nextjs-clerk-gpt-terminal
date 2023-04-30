@@ -77,6 +77,28 @@ const Main = () => {
   const { isLoaded, user } = useUser()
   const router = useRouter();
   const {entitlement} = router.query
+  console.log(entitlement)
+  const [IsLicensed, setIsLicensed] = useState(false)
+  const [licenses, setLicenses] = useState([])
+  useEffect( () => {
+    const makeQuery = async () => {
+      try {
+        const res = await fetch("/api/salable/check?entitlement="+entitlement);
+        const body = await res.json();
+        console.dir(body)
+        setLicenses(body["licenses"])
+        if (body.capabilities.includes("free")) {
+          setIsLicensed(true)          
+        } else {
+          setIsLicensed(false)
+        }
+      } catch (e) {
+        console.log("// There was an error with the request");    
+        console.dir(e)
+      }
+    }
+    makeQuery()   
+  }, [])
   return (
     isLoaded ?
     <main className={styles.main}>
@@ -89,7 +111,25 @@ const Main = () => {
         </IsNotLicensed>
       </SignedOut>     
       <SignedIn>
-        {entitlement}
+        {entitlement ? 
+        <>
+        <h3>Your user is licensed! Here's what's active.</h3>
+        <div>
+          {licenses.map((license, i) => {
+            return license.status === "ACTIVE" ?  
+            <div key={i}>
+              <LicenseBlock id={license.uuid} plan={license.plan.displayName} status= {license.status} />
+            </div> : <></>
+          })}
+        </div>
+        </> : <>
+          <div>
+            Tap your card to check your license!
+            <p>
+              Need a hand getting started? Try: using entitlement={user.id}
+            </p>
+          </div>
+        </>}
       </SignedIn>     
     </main>
     : <></>
