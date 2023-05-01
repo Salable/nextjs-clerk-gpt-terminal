@@ -1,17 +1,17 @@
-# fly.toml file generated for next-clerk-gpt-demo on 2023-04-21T13:55:33+01:00
+# fly.toml app configuration file generated for checkin-next-salable on 2023-04-30T21:43:28Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "next-clerk-gpt-demo"
+app = "checkin-next-salable"
 kill_signal = "SIGINT"
 kill_timeout = 5
-primary_region = "lhr"
+primary_region = "cdg"
 processes = []
 
 [build]
-  [build.args]
-    NEXT_PUBLIC_EXAMPLE = "Value goes here"
 
 [env]
-  PORT = "8080"
 
 [experimental]
   auto_rollback = true
