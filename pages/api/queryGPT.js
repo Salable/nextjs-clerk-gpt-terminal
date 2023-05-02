@@ -16,5 +16,3 @@ console.log(output);
     
   }
 }
-
-sq-1-BQMfndYygrg5to-b2u0zSfSe96-hW9sIHvLpiFFof9O4nSc4TyU94bdrDLzSVjJzTw

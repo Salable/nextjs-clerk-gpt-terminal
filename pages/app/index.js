@@ -69,6 +69,32 @@ const IsNotLicensed = ({children, capabilitiesCheckValue}) => {
 // End Salable React Provider
 //
 
+const SquareUp = () => {
+  var dataParameter = {
+    amount_money: {
+      amount:        "1",
+      currency_code: "GBP"
+    },
+
+    // Replace this value with your application's callback URL
+    callback_url: "https://nealriley-upgraded-bassoon-xr599g6xp4hv7vg-3000.preview.app.github.dev/api/callback",
+
+    // Replace this value with your application's ID
+    client_id: "sq0idp-x2BJD6hElTKsZsGc2x88uA",
+
+    version: "1.3",
+    notes: "notes for the transaction",
+    options: {
+      supported_tender_types: ["CREDIT_CARD","CASH","OTHER","SQUARE_GIFT_CARD","CARD_ON_FILE"]
+    }
+  };
+   return <>
+   <a href={"square-commerce-v1://payment/create?data="+encodeURIComponent(JSON.stringify(dataParameter))}>{"square-commerce-v1://payment/create?data="+encodeURIComponent(JSON.stringify(dataParameter))}</a>
+   </> 
+
+}
+
+
 
 // Main component
 // This renders components based on the user's sign in status and licensed status
@@ -93,6 +119,8 @@ const Main = () => {
         </IsNotLicensed>
         <IsLicensed capabilitiesCheckValue="free">
           <h1>This app is licensed.</h1>
+          <SquareUp />
+
         </IsLicensed>
       </SignedIn>     
     </main>
